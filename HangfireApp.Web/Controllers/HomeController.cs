@@ -67,6 +67,8 @@ namespace HangfireApp.Web.Controllers
                 }
 
                 var stringJobId = DealayedJobs.AddWatermarkJob(newFileName, "www.hangfiretest.com");
+
+                ContinuationsJobs.WriteWatermarkStatusJob(stringJobId, newFileName);
             }
 
             return View();
