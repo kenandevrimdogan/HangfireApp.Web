@@ -1,10 +1,12 @@
 ﻿using HangfireApp.Web.BackgroundJobs;
 using HangfireApp.Web.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -38,6 +40,33 @@ namespace HangfireApp.Web.Controllers
         public async Task<IActionResult> SignUp()
         {
             FireAndForgetJobs.EmailSendToUserJob("", "Welcome to Our Web Page");
+
+            return View();
+        }
+
+        public async Task<IActionResult> PictureSave()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PictureSave(IFormFile file)
+        {
+            string newFileName = String.Empty;
+
+            if (file != null && file.Length > 0)
+            {
+                newFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/pictures", newFileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                var stringJobId = DealayedJobs.AddWatermarkJob(newFileName, "www.hangfiretest.com");
+            }
 
             return View();
         }
